@@ -1,0 +1,75 @@
+#!/bin/bash
+
+CURRDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PPM_OUTPUT="out"
+HIDE_COLOR="000000"
+GIF_OUTPUT="."
+EXEC_MODEL=
+EXEC_APP=
+
+for i in "$@"
+do
+    case $i in
+	-p=*|--ppm-out=*)
+	    PPM_OUTPUT="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	-g=*|--gif-output=*)
+	    GIF_OUTPUT="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	-c=*|--hide-color=*)
+	    HIDE_COLOR="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	-a=*|--app=*)
+	    EXEC_APP="${i#*=}"
+	    shift
+	    ;;
+	-m|--model)
+	    EXEC_MODEL=YES
+	    shift # past argument with no value
+	    ;;
+	*)    # unknown option
+	    ;;
+    esac
+done
+if [[ -z $1 ]]; then
+    echo "You need to specify the path of the input PPM images!"
+    exit 1
+fi
+
+INPUT=$1
+NAME=$(echo $(basename $INPUT) | sed 's|-|_|g')
+
+echo $HIDE_COLOR
+
+if [[ -n $EXEC_MODEL ]]; then
+    echo "Executing model..."
+    OUTPUT="${PPM_OUTPUT}-model"
+    rm -rf $OUTPUT
+    mkdir -p $OUTPUT
+    for f in $(ls $INPUT/*.ppm); do cp -- "$f" "$OUTPUT/00$(basename $f)"; done
+    il2212-track $INPUT | xargs python $CURRDIR/hide.py -i $INPUT -o $OUTPUT -c $HIDE_COLOR
+    bash $CURRDIR/ppm2gif $OUTPUT
+fi
+
+if [[ -n $EXEC_APP ]]; then
+    if [ ! -f $EXEC_APP/run.sh ]; then
+	echo "Path does not point to a DE2-board application: $EXEC_APP"
+	echo "Missing 'run.sh' script."
+	exit 1
+    fi
+    APP_NAME=$(basename $EXEC_APP)
+    echo "Executing application $APP_NAME ..."
+    bash $CURRDIR/ppm2h $INPUT
+    echo "Building header file. This could take a while..."
+    mv images.h $EXEC_APP/src_0
+    
+    # OUTPUT="${APP_NAME}-model"
+    # rm -rf $OUTPUT
+    # mkdir -p $OUTPUT
+    # for f in $(ls $INPUT/*.ppm); do cp -- "$f" "$OUTPUT/0000$(basename $f)"; done
+    # il2212-track $INPUT | xargs python $CURRDIR/hide.py -i $INPUT -o $OUTPUT -c $HIDE_COLOR
+    # bash $CURRDIR/ppm2gif $OUTPUT
+fi
