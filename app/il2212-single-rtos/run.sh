@@ -59,4 +59,4 @@ nios2-download -g $APP.elf --cpu_name $CPU --jdi $CORE_DIR/$SOF.jdi
 
 echo ""
 echo "Statistics"
-nios2-elf-size $APP.elf
+nios2-elf-size *.elf

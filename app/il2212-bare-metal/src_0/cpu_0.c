@@ -5,9 +5,9 @@
 #include "ascii_gray.h"
 
 #define dSPAN 15
-#define cropSIZE ((2*dSPAN)+1) //the size of the image after cropping
+#define cropSIZE 31 //the size of the image after cropping
 
-//#define PERFORMANCE
+#define PERFORMANCE
 #define DEBUG
 
 unsigned char grayed[64][64]; //output matrix of the grayscale function
@@ -186,7 +186,8 @@ int main()
 	int i;
   int j;
   #ifdef PERFORMANCE
-  PERF_BEGIN(PERFORMANCE_COUNTER_0_BASE, 1);
+  while(counter++<2000){
+      if(counter==0)PERF_BEGIN(PERFORMANCE_COUNTER_0_BASE, 1);
   for(j = 0; j<2; j++){
     #endif
     for(i=0; i<4;i++){
@@ -211,7 +212,7 @@ int main()
   #ifdef PERFORMANCE
   i=0;
 }
-  #endif
+  #endif}
     #ifdef PERFORMANCE
     PERF_END(PERFORMANCE_COUNTER_0_BASE, i+1);
   /* End Measuring */

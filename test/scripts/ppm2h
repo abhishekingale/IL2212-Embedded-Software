@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUT="$@"
+INPUT="/home/student/Desktop/il2212-lab-master/test/test-ppm"
 OUTPUT="images.h"
 PPMS=$(ls $INPUT/*.ppm | sort)
 NAME=$(echo $(basename $INPUT) | sed 's|-|_|g')
